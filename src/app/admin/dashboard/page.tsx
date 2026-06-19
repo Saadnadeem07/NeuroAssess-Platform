@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { LayoutDashboard, ShieldCheck, Stethoscope, Users, SlidersHorizontal } from "lucide-react";
+import { LayoutDashboard, ShieldCheck, Stethoscope, Users, UserCog } from "lucide-react";
 import { DashboardShell, type NavItem } from "@/components/dashboard/DashboardShell";
 import { useRequireRole } from "@/components/dashboard/useRequireRole";
 import { FullScreenSpinner } from "@/components/ui/spinner";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminApprovals } from "@/components/admin/AdminApprovals";
 import { AdminUsers } from "@/components/admin/AdminUsers";
-import { AdminSettings } from "@/components/admin/AdminSettings";
+import { AdminManagement } from "@/components/admin/AdminManagement";
 
 export default function AdminDashboard() {
   const { user, ready } = useRequireRole("admin");
@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     { key: "approvals", label: "Approvals", icon: ShieldCheck, badge: pendingCount },
     { key: "psychiatrists", label: "Psychiatrists", icon: Stethoscope },
     { key: "patients", label: "Patients", icon: Users },
-    { key: "settings", label: "Settings", icon: SlidersHorizontal },
+    { key: "admins", label: "Administrators", icon: UserCog },
   ];
 
   return (
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
       {active === "approvals" && <AdminApprovals onCountChange={setPendingCount} />}
       {active === "psychiatrists" && <AdminUsers kind="psychiatrists" />}
       {active === "patients" && <AdminUsers kind="patients" />}
-      {active === "settings" && <AdminSettings />}
+      {active === "admins" && <AdminManagement user={user} />}
     </DashboardShell>
   );
 }

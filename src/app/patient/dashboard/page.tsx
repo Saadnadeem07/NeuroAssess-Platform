@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { DashboardShell, type NavItem } from "@/components/dashboard/DashboardShell";
 import { useRequireRole } from "@/components/dashboard/useRequireRole";
-import { ProfileCompletionGate } from "@/components/auth/ProfileCompletionGate";
+import { ProfileCompletionPrompt } from "@/components/dashboard/ProfileCompletionPrompt";
 import { FullScreenSpinner } from "@/components/ui/spinner";
 import { PatientOverview } from "@/components/patient/PatientOverview";
 import { InitialTestPanel } from "@/components/patient/InitialTestPanel";
@@ -41,11 +41,9 @@ export default function PatientDashboard() {
 
   if (!ready || !user) return <FullScreenSpinner label="Loading your dashboard…" />;
 
-  // Block the dashboard until the profile is complete.
-  if (!user.profileComplete) return <ProfileCompletionGate role="patient" user={user} />;
-
   return (
     <DashboardShell navItems={NAV} active={active} onChange={setActive} roleLabel="Patient" userName={user.name}>
+      {!user.profileComplete && <ProfileCompletionPrompt role="patient" user={user} />}
       {active === "overview" && <PatientOverview user={user} onNavigate={setActive} />}
       {active === "test" && <InitialTestPanel />}
       {active === "plan" && <LearningPlanPanel />}

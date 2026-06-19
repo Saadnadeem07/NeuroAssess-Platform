@@ -5,8 +5,8 @@ import { LayoutDashboard, Users, CalendarClock, Clock, MessagesSquare, UserCog }
 import { DashboardShell, type NavItem } from "@/components/dashboard/DashboardShell";
 import { useRequireRole } from "@/components/dashboard/useRequireRole";
 import { FullScreenSpinner } from "@/components/ui/spinner";
-import { PendingApprovalScreen } from "@/components/psychiatrist/PendingApprovalScreen";
-import { ProfileCompletionGate } from "@/components/auth/ProfileCompletionGate";
+import { ProfileCompletionPrompt } from "@/components/dashboard/ProfileCompletionPrompt";
+import { PendingApprovalBanner } from "@/components/psychiatrist/PendingApprovalBanner";
 import { PsychiatristOverview } from "@/components/psychiatrist/PsychiatristOverview";
 import { PsychiatristPatients } from "@/components/psychiatrist/PsychiatristPatients";
 import { AvailabilityPanel } from "@/components/psychiatrist/AvailabilityPanel";
@@ -29,12 +29,13 @@ export default function PsychiatristDashboard() {
 
   if (!ready || !user) return <FullScreenSpinner label="Loading your dashboard…" />;
 
-  // 1) Complete credentials, 2) then await admin approval, 3) then dashboard.
-  if (!user.profileComplete) return <ProfileCompletionGate role="psychiatrist" user={user} />;
-  if (user.isApproved === false) return <PendingApprovalScreen name={user.name} />;
+  const incomplete = !user.profileComplete;
+  const awaitingApproval = !!user.profileComplete && user.isApproved === false;
 
   return (
     <DashboardShell navItems={NAV} active={active} onChange={setActive} roleLabel="Psychiatrist" userName={user.name}>
+      {incomplete && <ProfileCompletionPrompt role="psychiatrist" user={user} />}
+      {awaitingApproval && <PendingApprovalBanner />}
       {active === "overview" && <PsychiatristOverview user={user} onNavigate={setActive} />}
       {active === "patients" && <PsychiatristPatients />}
       {active === "appointments" && <AppointmentsPanel role="psychiatrist" />}

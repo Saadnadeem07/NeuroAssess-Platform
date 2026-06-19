@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Caveat } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/components/ui/toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const caveat = Caveat({ subsets: ["latin"], weight: ["400", "600"], variable: "--font-hand", display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -30,7 +31,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${caveat.variable}`}>
       <body className="min-h-screen font-sans">
         <AuthProvider>
           <ToastProvider>{children}</ToastProvider>

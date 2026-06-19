@@ -25,6 +25,13 @@ export const changePasswordSchema = z.object({
   newPassword: passwordSchema,
 });
 
+export const createAdminSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  email: emailSchema,
+  password: passwordSchema,
+  superAdmin: z.boolean().optional(),
+});
+
 // --- Minimal sign-up (both roles): just identity + credentials ------------
 
 export const registerPatientSchema = z.object({

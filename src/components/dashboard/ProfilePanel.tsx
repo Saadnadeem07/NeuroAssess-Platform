@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { User, KeyRound, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { User, KeyRound, Loader2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageIntro } from "@/components/dashboard/widgets";
-import { api } from "@/lib/api-client";
+import { api, ApiClientError } from "@/lib/api-client";
 import { useToast } from "@/components/ui/toast";
 import { useAuth, type AuthUser } from "@/context/AuthContext";
 import type { UserRole } from "@/services/auth-client";
@@ -59,7 +60,10 @@ export function ProfilePanel({ role, user }: { role: UserRole; user: AuthUser })
   return (
     <div>
       <PageIntro title="Profile & settings" description="Manage your account details and security." />
-      <div className="grid gap-6 lg:grid-cols-2">
+
+      <AvatarCard user={user} role={role} />
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <form onSubmit={saveName} className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
@@ -104,6 +108,79 @@ export function ProfilePanel({ role, user }: { role: UserRole; user: AuthUser })
           </Button>
         </form>
       </div>
+    </div>
+  );
+}
+
+function AvatarCard({ user, role }: { user: AuthUser; role: UserRole }) {
+  const { toast } = useToast();
+  const { refreshUser } = useAuth();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const avatarUrl = typeof user.avatarUrl === "string" ? user.avatarUrl : "";
+  const initials = user.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("image", file);
+      await api.upload("/users/avatar", form);
+      await refreshUser();
+      toast({ title: "Photo updated", variant: "success" });
+    } catch (err) {
+      const msg = err instanceof ApiClientError ? err.message : "Upload failed";
+      toast({ title: "Couldn't update photo", description: msg, variant: "error" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-5 rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="relative">
+        {avatarUrl ? (
+          <Image
+            src={avatarUrl}
+            alt={user.name}
+            width={72}
+            height={72}
+            className="rounded-full object-cover"
+            style={{ height: 72, width: 72 }}
+            unoptimized
+          />
+        ) : (
+          <span className="grid h-[72px] w-[72px] place-items-center rounded-full gradient-brand text-xl font-semibold text-primary-foreground">
+            {initials}
+          </span>
+        )}
+        <button
+          onClick={() => inputRef.current?.click()}
+          className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full border-2 border-card bg-primary text-primary-foreground shadow-sm transition hover:opacity-90"
+          aria-label="Change photo"
+        >
+          {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+      <div>
+        <p className="text-lg font-semibold">{user.name}</p>
+        <p className="text-sm text-muted-foreground capitalize">{role}</p>
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="mt-1 text-sm font-medium text-primary hover:underline disabled:opacity-50"
+        >
+          {uploading ? "Uploading…" : "Change profile photo"}
+        </button>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/gif,image/webp"
+        className="hidden"
+        onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
+      />
     </div>
   );
 }

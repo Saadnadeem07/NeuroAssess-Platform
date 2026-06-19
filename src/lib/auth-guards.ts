@@ -49,3 +49,5 @@ export const requirePsychiatrist = (req: NextRequest) => authenticate(req, ["psy
 export const requireAdmin = (req: NextRequest) => authenticate(req, ["admin"]);
 export const requirePatientOrPsychiatrist = (req: NextRequest) =>
   authenticate(req, ["patient", "psychiatrist"]);
+export const requireAnyRole = (req: NextRequest) =>
+  authenticate(req, ["patient", "psychiatrist", "admin"]);

@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const res = NextResponse.redirect(new URL("/auth/continue?role=patient", req.url));
+    const res = NextResponse.redirect(new URL("/continue?role=patient", req.url));
     await issueTokens(patient, "patient", req, res);
     res.cookies.set("g_oauth_state", "", { path: "/", maxAge: 0 });
     return res;

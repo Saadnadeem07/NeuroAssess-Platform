@@ -1,26 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2, LogOut, ShieldCheck, UserCheck } from "lucide-react";
-import { Logo } from "@/components/landing/Logo";
+import { Sparkles, X, Loader2, ShieldCheck, ArrowRight } from "lucide-react";
 import { Field } from "@/components/auth/Field";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api-client";
+import { api, ApiClientError } from "@/lib/api-client";
 import { useToast } from "@/components/ui/toast";
 import { useAuth, type AuthUser } from "@/context/AuthContext";
-import { ApiClientError } from "@/lib/api-client";
 
 type Role = "patient" | "psychiatrist";
 
-export function ProfileCompletionGate({ role, user }: { role: Role; user: AuthUser }) {
-  const router = useRouter();
+/**
+ * Non-blocking profile completion: a banner on the dashboard that opens an
+ * optional modal. The user can keep using the app and complete it whenever.
+ */
+export function ProfileCompletionPrompt({ role, user }: { role: Role; user: AuthUser }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <div className="mb-6 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg gradient-brand text-primary-foreground">
+            <Sparkles className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="font-semibold">Complete your profile</p>
+            <p className="text-sm text-muted-foreground">
+              {role === "psychiatrist"
+                ? "Add your professional credentials to get approved and start seeing patients."
+                : "Add a few details to personalise your care and unlock everything."}
+            </p>
+          </div>
+        </div>
+        <Button onClick={() => setOpen(true)} className="shrink-0">
+          Complete now
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {open && <CompletionModal role={role} user={user} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+function CompletionModal({ role, user, onClose }: { role: Role; user: AuthUser; onClose: () => void }) {
   const { toast } = useToast();
-  const { refreshUser, logout } = useAuth();
-  const [form, setForm] = useState<Record<string, string>>({ name: user.name });
+  const { refreshUser } = useAuth();
+  const [form, setForm] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -59,6 +89,7 @@ export function ProfileCompletionGate({ role, user }: { role: Role; user: AuthUs
         variant: "success",
       });
       await refreshUser();
+      onClose();
     } catch (err) {
       const msg =
         err instanceof ApiClientError
@@ -72,60 +103,40 @@ export function ProfileCompletionGate({ role, user }: { role: Role; user: AuthUs
     }
   };
 
-  const onLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
-
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="border-b border-border bg-card">
-        <div className="container-tight flex h-16 items-center justify-between">
-          <Logo />
-          <Button variant="ghost" size="sm" onClick={onLogout} className="text-muted-foreground">
-            <LogOut className="h-4 w-4" />
-            Log out
-          </Button>
+    <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center">
+      <div className="my-8 w-full max-w-2xl rounded-2xl bg-card shadow-xl">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div>
+            <h2 className="text-lg font-bold">Complete your profile</h2>
+            <p className="text-sm text-muted-foreground">
+              {role === "psychiatrist" ? "Professional credentials" : "A few quick details"}
+            </p>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground transition hover:text-foreground" aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
         </div>
-      </header>
 
-      <main className="container-tight flex justify-center py-10">
-        <div className="w-full max-w-2xl">
-          <div className="mb-6 rounded-2xl gradient-brand p-6 text-primary-foreground shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/15">
-                <UserCheck className="h-6 w-6" />
-              </span>
-              <div>
-                <h1 className="text-xl font-bold">Complete your profile</h1>
-                <p className="text-sm text-primary-foreground/90">
-                  {role === "psychiatrist"
-                    ? "Add your professional credentials to be reviewed for approval."
-                    : "Just a few details and you're ready to go."}
-                </p>
-              </div>
-            </div>
+        <form onSubmit={submit} className="space-y-5 px-6 py-6">
+          {role === "patient" ? <PatientFields form={form} set={set} /> : <PsychiatristFields form={form} set={set} />}
+
+          <div className="flex items-center gap-2 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
+            Your information is private and used only to personalise your care.
           </div>
 
-          <form onSubmit={submit} className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
-            {role === "patient" ? (
-              <PatientFields form={form} set={set} />
-            ) : (
-              <PsychiatristFields form={form} set={set} />
-            )}
-
-            <div className="flex items-center gap-2 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
-              Your information is private and used only to personalise your care.
-            </div>
-
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {role === "psychiatrist" ? "Submit for review" : "Finish setup"}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={onClose}>
+              Later
             </Button>
-          </form>
-        </div>
-      </main>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {role === "psychiatrist" ? "Submit for review" : "Save profile"}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

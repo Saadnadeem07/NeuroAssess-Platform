@@ -7,9 +7,9 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 
 const LINKS = [
+  { href: "#understanding", label: "About dyslexia" },
   { href: "#features", label: "Features" },
   { href: "#how-it-works", label: "How it works" },
-  { href: "#audience", label: "Who it's for" },
   { href: "#faq", label: "FAQ" },
 ];
 

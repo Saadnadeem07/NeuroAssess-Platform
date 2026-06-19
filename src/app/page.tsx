@@ -11,6 +11,10 @@ import {
   Stethoscope,
   ArrowRight,
   Sparkles,
+  BookOpen,
+  PenLine,
+  Lightbulb,
+  Heart,
 } from "lucide-react";
 import { SiteNav } from "@/components/landing/SiteNav";
 import { SiteFooter } from "@/components/landing/SiteFooter";
@@ -50,11 +54,25 @@ const FEATURES = [
   },
 ];
 
-const STEPS = [
-  { n: "01", title: "Create your account", desc: "Register in seconds and verify your email with a one-time code." },
-  { n: "02", title: "Take the handwriting test", desc: "Upload a sample; the AI analyses it for markers of dysgraphia." },
-  { n: "03", title: "Follow your plan", desc: "Work through your personalised modules at your own pace." },
-  { n: "04", title: "Get professional support", desc: "Book and message licensed psychiatrists whenever you need them." },
+const JOURNEY = [
+  {
+    n: "01",
+    title: "Initial assessment",
+    desc: "Complete an AI-powered handwriting assessment to evaluate signs of dyslexia or dysgraphia.",
+    points: ["AI analysis of writing patterns", "Symptom identification", "Initial recommendations"],
+  },
+  {
+    n: "02",
+    title: "Personalized learning plan",
+    desc: "Receive a tailored, multi-module plan built from AI insights and expert-informed strategies.",
+    points: ["Targeted reading & writing exercises", "Intervention strategies", "Progress tracking & adjustments"],
+  },
+  {
+    n: "03",
+    title: "Expert consultation",
+    desc: "Consult a licensed psychiatrist to validate the AI findings and discuss next steps.",
+    points: ["Expert review of AI results", "Customized recommendations", "Ongoing follow-up consultations"],
+  },
 ];
 
 const AUDIENCE = [
@@ -82,6 +100,35 @@ const FAQ = [
   },
 ];
 
+const DYSLEXIA_SIGNS = [
+  "Reversing letters or whole words (b/d, was/saw)",
+  "Slow, effortful reading aloud",
+  "Difficulty with spelling, rhyming and phonics",
+  "Trouble remembering sequences and instructions",
+];
+
+const DYSGRAPHIA_SIGNS = [
+  "Inconsistent letter size, shape and spacing",
+  "Mixing capital and lowercase letters",
+  "Awkward pencil grip; tires quickly when writing",
+  "Writing that doesn't match the child's ideas or ability",
+];
+
+// Illustrative examples of common patterns — NOT real student data.
+const WRITING_EXAMPLES = [
+  { wrote: "I lik to red bwks abuot dinosrs", meant: "I like to read books about dinosaurs" },
+  { wrote: "We went to the prak on Wensday", meant: "We went to the park on Wednesday" },
+  { wrote: "My freind sed it was a god day", meant: "My friend said it was a good day" },
+];
+
+const REVERSALS = ["b ↔ d", "was ↔ saw", "on ↔ no", "p ↔ q"];
+
+// Lined-notebook background for the handwriting samples.
+const PAPER_STYLE = {
+  backgroundImage: "repeating-linear-gradient(transparent, transparent 31px, hsl(214 32% 88%) 32px)",
+  backgroundColor: "hsl(48 100% 98%)",
+} as const;
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -97,7 +144,7 @@ export default function LandingPage() {
           <div className="container-tight py-20 text-center sm:py-28">
             <Badge className="mx-auto mb-6 gap-1.5">
               <Sparkles className="h-3.5 w-3.5" />
-              AI-assisted learning support
+              Empowering neurodivergent minds
             </Badge>
             <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
               Understand handwriting.
@@ -144,6 +191,134 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Understanding the challenge */}
+        <section id="understanding" className="container-tight py-20 sm:py-24">
+          <div className="mx-auto max-w-2xl text-center">
+            <Badge variant="muted" className="mb-4">Understanding the challenge</Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              It&apos;s not about effort or intelligence
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Dyslexia and dysgraphia are common, lifelong learning differences in how the brain
+              processes reading and writing. With early detection and the right support, every
+              learner can thrive.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <BookOpen className="h-6 w-6" />
+                </span>
+                <h3 className="text-xl font-semibold">Dyslexia</h3>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Affects how the brain decodes reading, spelling and words — entirely independent of
+                intelligence. Many people with dyslexia are exceptionally creative, big-picture
+                problem-solvers.
+              </p>
+              <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Common signs
+              </p>
+              <ul className="mt-3 space-y-2">
+                {DYSLEXIA_SIGNS.map((s) => (
+                  <li key={s} className="flex items-start gap-2 text-sm">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <PenLine className="h-6 w-6" />
+                </span>
+                <h3 className="text-xl font-semibold">Dysgraphia</h3>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Affects the physical act of writing — letter formation, spacing and putting thoughts
+                on paper. A child can know exactly what they want to say, yet struggle to write it
+                legibly.
+              </p>
+              <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Common signs
+              </p>
+              <ul className="mt-3 space-y-2">
+                {DYSGRAPHIA_SIGNS.map((s) => (
+                  <li key={s} className="flex items-start gap-2 text-sm">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center sm:flex-row sm:text-left">
+            <Lightbulb className="h-7 w-7 shrink-0 text-primary" />
+            <p className="text-sm text-foreground">
+              <strong>Around 1 in 10 people</strong> are affected by dyslexia — and it often goes
+              undiagnosed for years. Early detection changes the whole trajectory of a child&apos;s
+              learning.
+            </p>
+          </div>
+        </section>
+
+        {/* What it looks like — illustrative handwriting */}
+        <section className="border-y border-border bg-muted/30">
+          <div className="container-tight py-20 sm:py-24">
+            <div className="mx-auto max-w-2xl text-center">
+              <Badge variant="muted" className="mb-4">What it looks like</Badge>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                The same bright idea — harder to get onto the page
+              </h2>
+              <p className="mt-4 text-muted-foreground">
+                Below are illustrative examples of the handwriting and spelling patterns NeuroAssess
+                is designed to recognise — the gap between what a learner means and what reaches the
+                page.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-6 lg:grid-cols-3">
+              {WRITING_EXAMPLES.map((ex) => (
+                <div key={ex.meant} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                  <div className="px-5 py-6" style={PAPER_STYLE}>
+                    <p className="font-hand text-2xl leading-8 text-slate-700">{ex.wrote}</p>
+                  </div>
+                  <div className="border-t border-border p-5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Meant to write</p>
+                    <p className="mt-1 text-sm font-medium text-foreground">&ldquo;{ex.meant}&rdquo;</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 flex flex-col items-center gap-4">
+              <p className="text-sm font-semibold text-muted-foreground">Letters and words that get mirrored or swapped</p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {REVERSALS.map((r) => (
+                  <span
+                    key={r}
+                    className="rounded-xl border border-border bg-card px-5 py-3 font-hand text-2xl text-slate-700 shadow-sm"
+                  >
+                    {r}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <p className="mx-auto mt-10 max-w-xl text-center text-xs text-muted-foreground">
+              <Heart className="mr-1 inline h-3.5 w-3.5 text-primary" />
+              Illustrative examples of common patterns, created for explanation — not real student
+              data. Every learner is different, which is exactly why assessment and support are
+              personalised.
+            </p>
+          </div>
+        </section>
+
         {/* Features */}
         <section id="features" className="container-tight py-20 sm:py-24">
           <div className="mx-auto max-w-2xl text-center">
@@ -169,19 +344,35 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* How it works */}
+        {/* How it works — your path to personalized support */}
         <section id="how-it-works" className="border-y border-border bg-muted/30">
           <div className="container-tight py-20 sm:py-24">
             <div className="mx-auto max-w-2xl text-center">
               <Badge variant="muted" className="mb-4">How it works</Badge>
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">From sample to support in four steps</h2>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Your path to personalized support
+              </h2>
+              <p className="mt-4 text-muted-foreground">
+                From the first assessment to expert-validated care, NeuroAssess guides every student
+                through a clear, supportive journey.
+              </p>
             </div>
-            <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {STEPS.map((s) => (
-                <div key={s.n} className="relative rounded-2xl border border-border bg-card p-6 shadow-sm">
-                  <span className="text-3xl font-extrabold text-primary/20">{s.n}</span>
-                  <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
+            <div className="mt-14 grid gap-6 md:grid-cols-3">
+              {JOURNEY.map((s) => (
+                <div key={s.n} className="relative flex flex-col rounded-2xl border border-border bg-card p-7 shadow-sm">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl gradient-brand text-base font-bold text-primary-foreground">
+                    {s.n}
+                  </span>
+                  <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
+                  <ul className="mt-5 space-y-2 border-t border-border pt-5">
+                    {s.points.map((p) => (
+                      <li key={p} className="flex items-start gap-2 text-sm">
+                        <span className="mt-1 text-primary">✓</span>
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>

@@ -4,6 +4,7 @@ import { requirePatient } from "@/lib/auth-guards";
 import { AppError } from "@/lib/AppError";
 import { ERROR_CODES } from "@/lib/errorCodes";
 import { analyzeHandwriting } from "@/lib/ai";
+import { uploadImage, cloudinaryConfigured } from "@/lib/cloudinary";
 import Report from "@/models/Report";
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/gif", "image/jpg"]);
@@ -31,7 +32,16 @@ export const POST = withRoute(async (req: NextRequest) => {
 
   const bytes = Buffer.from(await file.arrayBuffer());
   const analysis = await analyzeHandwriting(bytes);
-  const base64Image = `data:${file.type};base64,${bytes.toString("base64")}`;
+
+  // Store the sample on Cloudinary when configured; otherwise inline as base64.
+  let imageRef = `data:${file.type};base64,${bytes.toString("base64")}`;
+  if (cloudinaryConfigured()) {
+    try {
+      imageRef = await uploadImage(bytes, file.type, "handwriting");
+    } catch (err) {
+      console.warn("[tests] Cloudinary upload failed, falling back to base64:", (err as Error).message);
+    }
+  }
 
   const response: Record<string, unknown> = {
     success: true,
@@ -47,7 +57,7 @@ export const POST = withRoute(async (req: NextRequest) => {
       spelling_errors: analysis.spelling_errors || [],
       alignment_issues: analysis.alignment_issues || [],
       spacing_issues: analysis.spacing_issues || [],
-      image: base64Image,
+      image: imageRef,
     };
 
     const report = await Report.create({
